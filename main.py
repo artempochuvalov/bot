@@ -3,6 +3,9 @@ import sqlite3 as sql
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
+from PIL import Image
+from PIL import ImageDraw
+from PIL import ImageFont
 
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 if os.path.exists(dotenv_path):
@@ -56,6 +59,42 @@ def get_users_data() -> list:
         return users_data
 
 
+def draw_image(user_id: int, text: str) -> str:
+    """
+        Draws temporary image of a cat with text on the center
+
+        Returns
+        -------
+        img_path: str
+            Path to the image
+    """
+    img = Image.open('./static/sad_cat.jpg')
+    draw = ImageDraw.Draw(img)
+
+    # width and height of the original image
+    W, H = img.size
+    font = ImageFont.truetype("arial.ttf", 32)
+    # with and height of the text
+    _, _, w, h = draw.textbbox(xy=(0, 0), text=text, font=font)
+
+    draw.text(((W-w)/2, (H-h)/2), text, fill="blue", font=font)
+
+    img_path = f"./static/sad_cat_{user_id}.jpg"
+    img.save(img_path)
+
+    return img_path
+
+
+def delete_image(img_path: str) -> None:
+    """
+        Deletes temporary image
+    """
+    try:
+        os.remove(img_path)
+    except FileNotFoundError:
+        pass
+
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
         Starts bot application with /start command and
@@ -65,9 +104,13 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     username = update.message.from_user.username
     time = str(update.message.date)
 
-    await update.message.reply_photo("./static/sad_cat.jpg", time)
+    image_path = draw_image(user_id, time)
+
+    await update.message.reply_photo(image_path)
 
     save_user_data(user_id, username, time)
+    # cleans temporary image
+    delete_image(image_path)
 
 
 async def users(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
