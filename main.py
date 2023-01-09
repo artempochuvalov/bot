@@ -11,6 +11,9 @@ token = os.environ['TOKEN']
 
 
 def save_user_data(user_id: int, username: str, time: str) -> None:
+    """
+        Saves user's id, username and time of message sent, to SQL db.
+    """
     with sql.connect("users.db") as db:
         cursor = db.cursor()
 
@@ -27,6 +30,7 @@ def save_user_data(user_id: int, username: str, time: str) -> None:
         if user_data is None:
             cursor.execute("INSERT INTO users_data VALUES(?, ?, ?);", [user_id, username, time])
             db.commit()
+        # if id already in the table -> only change time of message and username
         else:
             cursor.execute(
                 f"UPDATE users_data SET time = ?, username = ? WHERE id = {user_id}",
@@ -35,6 +39,14 @@ def save_user_data(user_id: int, username: str, time: str) -> None:
 
 
 def get_users_data() -> list:
+    """
+        Fetches all users' data from SQL db.
+
+        Returns
+        -------
+        users_data: list
+            Array of users' data
+    """
     with sql.connect("users.db") as db:
         cursor = db.cursor()
 
@@ -45,6 +57,10 @@ def get_users_data() -> list:
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+        Starts bot application with /start command and
+        sending photo of a cat and time of message sent.
+    """
     user_id = update.message.from_user.id
     username = update.message.from_user.username
     time = str(update.message.date)
@@ -55,6 +71,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def users(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+        Forces bot to send users' data from DB with /users command
+    """
     users_data = get_users_data()
     if len(users_data) != 0:
         await update.message.reply_text(users_data)
@@ -63,6 +82,9 @@ async def users(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 def main() -> None:
+    """
+        Main function that initialize bot application and set commands.
+    """
     app = Application.builder().token(token).build()
 
     app.add_handler(CommandHandler(["start"], start))
