@@ -73,7 +73,7 @@ def draw_image(user_id: int, text: str) -> str:
 
     # width and height of the original image
     W, H = img.size
-    font = ImageFont.truetype("arial.ttf", 32)
+    font = ImageFont.truetype("./fonts/Roboto-Bold.ttf", 32)
     # with and height of the text
     _, _, w, h = draw.textbbox(xy=(0, 0), text=text, font=font)
 
