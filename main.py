@@ -88,7 +88,7 @@ def main() -> None:
     app = Application.builder().token(token).build()
 
     app.add_handler(CommandHandler(["start"], start))
-    app.add_handler(CommandHandler(["users"], get_users_data))
+    app.add_handler(CommandHandler(["users"], users))
 
     app.run_polling()
 
