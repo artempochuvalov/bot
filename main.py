@@ -54,7 +54,7 @@ def get_users_data() -> list:
         cursor = db.cursor()
 
         cursor.execute("SELECT * FROM users_data")
-        users_data = cursor.fetchmany()
+        users_data = cursor.fetchall()
 
         return users_data
 
